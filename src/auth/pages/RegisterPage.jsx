@@ -1,46 +1,105 @@
+import { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Google } from '@mui/icons-material';
 import { Button, Grid, Link, TextField, Typography } from '@mui/material';
+
 import { AuthLayout } from '../layout/AuthLayout';
+import { useForm } from '../../hooks/useFom';
 
+const formData = {
+	email: 'tonovarelaq@gmail.com',
+	password: '123456',
+	displayName: 'Marco Antonio Estelles Martínez'
+};
 
-
+const formValidations = {
+	email: [ (value) => value.includes('@'), 'El correo debe de contener una @' ],
+	password: [ (value) => value.length >= 6, 'El password debe tener mas de 6 letras' ],
+	displayName: [ (value) => value.length >= 1, 'El nombre es obligatorio' ]
+};
 
 export const RegisterPage = () => {
-  return (
-    <AuthLayout title='Registrate'>
-			
-			<form>
+	const {
+		displayName,
+		email,
+		password,
+		onInputChange,
+		formState,
+		displayNameValid,
+		isFormValid,
+		emailValid,
+		passwordValid
+	} = useForm(formData,formValidations);
+ 
+	const [formSubmitted, setFormSubmitted] = useState(false)
+
+	const onSubmit = (event) => {
+		event.preventDefault();
+		setFormSubmitted(true);
+		console.log(formState);
+	};
+	return (
+		<AuthLayout title="Registrate">
+			<h1>{isFormValid?"SI":"NO"}</h1>
+			<form onSubmit={onSubmit}>
 				<Grid container>
-        <Grid item xs={12} sx={{ mt: 2 }}>
-						<TextField label="Nombre" type="text" fullWidth placeholder="Marco Antonio Estelles" />
+					<Grid item xs={12} sx={{ mt: 2 }}>
+						<TextField
+							name="displayName"
+							onChange={onInputChange}
+							value={displayName}
+							label="Nombre"
+							type="text"
+							fullWidth
+							error={!!displayNameValid && formSubmitted}
+							helperText={displayNameValid}							
+							placeholder="Marco Antonio Estelles"
+						/>
 					</Grid>
 					<Grid item xs={12} sx={{ mt: 2 }}>
-						<TextField label="Correo" type="email" fullWidth placeholder="varela@gmail.com" />
+						<TextField
+							name="email"
+							value={email}
+							onChange={onInputChange}
+							label="Correo"
+							type="email"
+							fullWidth
+							error={!!emailValid && formSubmitted}
+							helperText={emailValid}
+							placeholder="varela@gmail.com"
+						/>
 					</Grid>
 					<Grid item xs={12} sx={{ mt: 2 }}>
-						<TextField label="Contaseña" type="password" fullWidth placeholder="123" />
+						<TextField
+							name="password"
+							value={password}
+							onChange={onInputChange}
+							label="Contaseña"
+							type="password"
+							error={!!passwordValid && formSubmitted}
+							helperText={passwordValid}
+							fullWidth
+							placeholder="123"
+						/>
 					</Grid>
-          <Grid item xs={12} sx={{ mt: 2 }}>
+					<Grid item xs={12} sx={{ mt: 2 }}>
 						<TextField label="Confirma la contaseña" type="password2" fullWidth placeholder="123" />
 					</Grid>
 
 					<Grid container spacing={2} sx={{ mb: 2, mt: 1 }}>
-						<Grid item xs={12} >
-							<Button variant="contained" fullWidth>								
+						<Grid item xs={12}>
+							<Button type="submit" variant="contained" fullWidth>
 								Registro
 							</Button>
 						</Grid>
-						
 					</Grid>
 				</Grid>
 				<Grid container direction="row" justifyContent="end">
-          <Typography>¿Tienes una cuenta? </Typography>
+					<Typography>¿Tienes una cuenta? </Typography>
 					<Link component={RouterLink} color="inherit" to="/auth/login">
 						Ingresa
 					</Link>
 				</Grid>
 			</form>
 		</AuthLayout>
-  )
-}
+	);
+};
