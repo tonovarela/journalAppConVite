@@ -1,4 +1,3 @@
-import { getDisplayName } from '@mui/utils';
 import { createSlice } from '@reduxjs/toolkit';
 
 export const authSlice = createSlice({
@@ -23,17 +22,17 @@ export const authSlice = createSlice({
                 state.errorMessage=null;        
                     
         },
-        logout:(state,{payload})=>{
+        logout:(state,{payload})=>{                
         state.status='not-authenticated', //not-authenticated,'autenticated'
         state.uid =null;
         state.email=null;
         state.displayName=null;
         state.photoURL=null;
-        state.errorMessage=payload.message;
+        state.errorMessage=payload;
         
         },
         checkingCredentials:(state)=>{
-                //state.status="checking"         
+                state.status="checking"         
         }
 	}
 });
