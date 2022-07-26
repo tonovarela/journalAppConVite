@@ -1,12 +1,13 @@
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Button, Grid, Link, TextField, Typography } from '@mui/material';
+import { Alert, Button, Grid, Link, TextField, Typography } from '@mui/material';
 
 import { AuthLayout } from '../layout/AuthLayout';
 import { useForm } from '../../hooks/useFom';
 import { startCreatingUserWithEmailPassword } from '../../store/auth';
+import { useMemo } from 'react';
 
 
 
@@ -36,6 +37,12 @@ export const RegisterPage = () => {
 		emailValid,
 		passwordValid
 	} = useForm(formData,formValidations);
+
+	const {status,errorMessage}  = useSelector(state=> state.auth);
+
+	const isCheckingAuthentication =  useMemo(()=>status ==='checking',[status]);
+
+
  
 	const [formSubmitted, setFormSubmitted] = useState(false)
 
@@ -47,8 +54,7 @@ export const RegisterPage = () => {
 		
 	};
 	return (
-		<AuthLayout title="Registrate">
-			<h1>{isFormValid?"SI":"NO"}</h1>
+		<AuthLayout title="Crear cuenta">		
 			<form onSubmit={onSubmit}>
 				<Grid container>
 					<Grid item xs={12} sx={{ mt: 2 }}>
@@ -90,13 +96,23 @@ export const RegisterPage = () => {
 							placeholder="123"
 						/>
 					</Grid>
-					<Grid item xs={12} sx={{ mt: 2 }}>
+					{/* <Grid item xs={12} sx={{ mt: 2 }}>
 						<TextField label="Confirma la contaseña" type="password2" fullWidth placeholder="123" />
-					</Grid>
+					</Grid> */}
 
 					<Grid container spacing={2} sx={{ mb: 2, mt: 1 }}>
+
+					<Grid item
+					display={!!errorMessage ?'':'none'}
+					 xs={12}>
+						<Alert severity='error'>
+							{errorMessage}
+						</Alert>
+						</Grid>
 						<Grid item xs={12}>
-							<Button type="submit" variant="contained" fullWidth>
+							<Button
+							disabled={isCheckingAuthentication}
+							type="submit" variant="contained" fullWidth>
 								Registro
 							</Button>
 						</Grid>
