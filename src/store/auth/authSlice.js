@@ -21,13 +21,13 @@ export const authSlice = createSlice({
                 state.errorMessage=null;        
                     
         },
-        logout:(state,{payload})=>{                
+        logout:(state,{payload})=>{                                
         state.status='not-authenticated', //not-authenticated,'autenticated'
         state.uid =null;
         state.email=null;
         state.displayName=null;
         state.photoURL=null;
-        state.errorMessage=payload;
+        state.errorMessage=payload || '';
         
         },
         checkingCredentials:(state)=>{
