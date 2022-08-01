@@ -1,21 +1,32 @@
-import { doc,collection,setDoc } from 'firebase/firestore/lite';
+import { addDoc, collection } from 'firebase/firestore';
 import { FireBaseDB } from '../../firebase/config';
+import { loadNotes } from '../../helpers';
+import { saveNote, savingNewNote, setActiveNote, setNotes } from './journalSlice';
 export const startNewNote = () => {
 	return async (dispatch, getState) => {
-		//uid
+		dispatch(savingNewNote());
 		const { uid } = getState().auth;
-
 		const newNote = {
 			title: '',
 			body: '',
 			date: new Date().getTime()
 		};
-		console.log(uid);
-		const newDoc = doc(collection(FireBaseDB,`${uid}/journal/notes`));
-		//const resp= await setDoc(newDoc,newNote);
-		//console.log(resp);
-		console.log(newDoc);
-				//dispathc New note
-		//activeNote
+		const newDoc = await addDoc(collection(FireBaseDB, `${uid}/journal/notes`), newNote);
+		newNote.id = newDoc.id;
+		dispatch(saveNote());
+		dispatch(setActiveNote(newNote));
 	};
 };
+
+export const startLoadingNotes = () => {
+	return async (dispatch, getState) => {
+		const { uid } = getState().auth;
+		if (!uid) throw new Error('El uid no existe');		
+		const notes=await  loadNotes(uid);
+		dispatch(setNotes(notes));
+		
+	};
+};
+
+
+
