@@ -1,18 +1,42 @@
-import { DataArrayRounded, SaveOutlined } from '@mui/icons-material';
-import { Grid, Typography, Button, TextField,  } from '@mui/material';
-import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import {  SaveOutlined } from '@mui/icons-material';
+import { Grid, Typography, Button, TextField } from '@mui/material';
+import { useEffect,useMemo } from 'react';
+
+import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from '../../hooks/useFom';
+import { setActiveNote, startSaveNote } from '../../store/journal';
 import { ImageGallery } from '../components';
+import Swal from 'sweetalert2';
+//import 'sweetalert2/dist/sweetalert2.css'
 
 export const NoteView = () => {
-	const { active: note } = useSelector((state) => state.journal);
-
+	const dispatch = useDispatch();
+		
+	const { active: note, MessageSaved ,isSaving} = useSelector((state) => state.journal);	
 	const { body, title, onInputChange, date, formState } = useForm(note);
-  const dateString =useMemo(()=>{
-    const fecha = new Date(date);
-    return fecha.toUTCString();
-  },[date])
+	 
+	useEffect(() => {
+		if (MessageSaved.length>0){
+			Swal.fire("Nota actualizada",MessageSaved,'success');
+		}	  
+	}, [MessageSaved]);
+	
+	
+	useEffect(() => {	
+		dispatch(setActiveNote(formState));
+	  }, [formState])
+
+	const dateString = useMemo(
+		() => {
+			const fecha = new Date(date);
+			return fecha.toUTCString();
+		},
+		[ date ]
+	);
+	const onSaveNote =()=>{
+		dispatch(startSaveNote());
+
+	}
 	return (
 		<Grid
 			container
@@ -28,7 +52,10 @@ export const NoteView = () => {
 				</Typography>
 			</Grid>
 			<Grid item>
-				<Button color="primary">
+				<Button 
+				disabled={isSaving}
+				onClick={onSaveNote}
+				 color="primary">
 					<SaveOutlined xs={{ fontSize: 30, mr: 1 }} />
 					Guardar
 				</Button>
@@ -37,9 +64,9 @@ export const NoteView = () => {
 				<TextField
 					type="text"
 					variant="filled"
-          name="title"
-          value={title}
-          onChange={onInputChange}        
+					name="title"
+					value={title}
+					onChange={onInputChange}
 					fullWidth
 					placeholder="Ingrese su título"
 					label="Título"
@@ -49,9 +76,9 @@ export const NoteView = () => {
 					type="text"
 					variant="filled"
 					fullWidth
-          name="body"
-          value={body}
-          onChange={onInputChange}        
+					name="body"
+					value={body}
+					onChange={onInputChange}
 					multiline
 					placeholder="¿Que sucedió en el día de hoy?"
 					minRows={5}
