@@ -1,5 +1,5 @@
 
-import { StartOutlined, StartSharp } from '@mui/icons-material';
+import { StartOutlined } from '@mui/icons-material';
 import { Grid, Typography } from '@mui/material';
 
 export const NothingSelectedView = () => {

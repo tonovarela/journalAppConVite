@@ -1,6 +1,6 @@
-import { addDoc, collection, updateDoc,doc } from 'firebase/firestore';
+import { addDoc, collection, updateDoc, doc } from 'firebase/firestore';
 import { FireBaseDB } from '../../firebase/config';
-import { loadNotes } from '../../helpers';
+import { fileUpload, loadNotes } from '../../helpers';
 import { saveNote, savingNewNote, setActiveNote, setNotes, setSaving, updatedNote } from './journalSlice';
 export const startNewNote = () => {
 	return async (dispatch, getState) => {
@@ -21,25 +21,30 @@ export const startNewNote = () => {
 export const startLoadingNotes = () => {
 	return async (dispatch, getState) => {
 		const { uid } = getState().auth;
-		if (!uid) throw new Error('El uid no existe');		
-		const notes=await  loadNotes(uid);
+		if (!uid) throw new Error('El uid no existe');
+		const notes = await loadNotes(uid);
 		dispatch(setNotes(notes));
-		
 	};
 };
 
-export const startSaveNote =()=>{
-	return async (dispatch,getState)=>{
+export const startSaveNote = () => {
+	return async (dispatch, getState) => {
 		dispatch(setSaving());
 
 		const { uid } = getState().auth;
-		const { active:note } = getState().journal;
-		const noteToFireStore = {...note};
-		//delete noteToFireStore.id;		
-		const noteRef = doc(FireBaseDB,`${uid}/journal/notes/${note.id}`)
-		await updateDoc(noteRef,noteToFireStore);
-		dispatch(updatedNote(noteToFireStore));			
+		const { active: note } = getState().journal;
+		const noteToFireStore = { ...note };
+		//delete noteToFireStore.id;
+		const noteRef = doc(FireBaseDB, `${uid}/journal/notes/${note.id}`);
+		await updateDoc(noteRef, noteToFireStore);
+		dispatch(updatedNote(noteToFireStore));
+	};
+};
 
-	}
-}
-
+export const startUploadingFiles = (files) => {
+	return async (dispatch) => {
+		dispatch(setSaving());
+		const _files = Array.from(files);
+		_files.forEach(async (f) => await fileUpload(f));
+	};
+};

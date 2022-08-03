@@ -13,10 +13,9 @@ export const SideBarItem = ({id,title ="",body,date,imageUrls =[]}) => {
      return title.length>17 ?title.substring(0,17)+'...':title
     },[title]);
 
-
 	const handledClick =()=>{
-		dispatch(setActiveNote({id,title,body,id,date,imageUrls}))	
-	}
+		dispatch(setActiveNote({id,title,body,date,imageUrls}))	
+	}	
 	
 	return (
 		<ListItem disablePadding>

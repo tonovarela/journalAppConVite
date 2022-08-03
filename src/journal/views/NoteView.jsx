@@ -1,30 +1,34 @@
-import {  SaveOutlined } from '@mui/icons-material';
-import { Grid, Typography, Button, TextField } from '@mui/material';
-import { useEffect,useMemo } from 'react';
-
+import { SaveOutlined, UploadOutlined } from '@mui/icons-material';
+import { Grid, Typography, Button, TextField, IconButton } from '@mui/material';
+import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from '../../hooks/useFom';
-import { setActiveNote, startSaveNote } from '../../store/journal';
+import { setActiveNote, startSaveNote,startUploadingFiles } from '../../store/journal';
 import { ImageGallery } from '../components';
 import Swal from 'sweetalert2';
 //import 'sweetalert2/dist/sweetalert2.css'
 
 export const NoteView = () => {
 	const dispatch = useDispatch();
-		
-	const { active: note, MessageSaved ,isSaving} = useSelector((state) => state.journal);	
+
+	const { active: note, MessageSaved, isSaving } = useSelector((state) => state.journal);
 	const { body, title, onInputChange, date, formState } = useForm(note);
-	 
-	useEffect(() => {
-		if (MessageSaved.length>0){
-			Swal.fire("Nota actualizada",MessageSaved,'success');
-		}	  
-	}, [MessageSaved]);
-	
-	
-	useEffect(() => {	
-		dispatch(setActiveNote(formState));
-	  }, [formState])
+
+	useEffect(
+		() => {
+			if (MessageSaved.length > 0) {
+				Swal.fire('Nota actualizada', MessageSaved, 'success');
+			}
+		},
+		[ MessageSaved ]
+	);
+
+	useEffect(
+		() => {
+			dispatch(setActiveNote(formState));
+		},
+		[ formState ]
+	);
 
 	const dateString = useMemo(
 		() => {
@@ -33,10 +37,19 @@ export const NoteView = () => {
 		},
 		[ date ]
 	);
-	const onSaveNote =()=>{
+	const onSaveNote = () => {
 		dispatch(startSaveNote());
+	};
 
-	}
+	const onFileInputChange = ({ target }) => {
+		const {files} = target
+		if (files.length == 0) {
+			return;
+		}
+		dispatch(startUploadingFiles(files));
+		
+	};
+
 	return (
 		<Grid
 			container
@@ -52,14 +65,23 @@ export const NoteView = () => {
 				</Typography>
 			</Grid>
 			<Grid item>
-				<Button 
-				disabled={isSaving}
-				onClick={onSaveNote}
-				 color="primary">
-					<SaveOutlined xs={{ fontSize: 30, mr: 1 }} />
-					Guardar
-				</Button>
-			</Grid>
+                <IconButton>
+                    <label htmlFor="btnFile"> 
+                        <UploadOutlined />
+                    </label>
+                </IconButton>
+                <input
+                    id="btnFile" 
+                    style={{ display: "none" }}
+                    type="file"
+                    multiple
+                    onChange={onFileInputChange}
+                />
+                <Button disabled={isSaving} onClick={onSaveNote}>
+                    <SaveOutlined sx={{ fontSize: 30, mr: 1 }} />
+                    Guardar
+                </Button>
+            </Grid>			
 			<Grid container>
 				<TextField
 					type="text"
