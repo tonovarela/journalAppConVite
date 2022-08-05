@@ -1,7 +1,14 @@
-import { addDoc, collection, updateDoc, doc } from 'firebase/firestore';
+import { addDoc, collection, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { FireBaseDB } from '../../firebase/config';
 import { fileUpload, loadNotes } from '../../helpers';
-import { saveNote, savingNewNote, setActiveNote, setNotes, setPhotosToActiveNote, setSaving, updatedNote } from './journalSlice';
+import { deleteNoteByID, saveNote, savingNewNote, setActiveNote, setNotes, setPhotosToActiveNote, setSaving, updatedNote } from './journalSlice';
+//import cloudinary from "cloudinary";
+// cloudinary.config({
+// 	secure:true,			
+// 	cloud_name: process.env.REACT_APP_CLOUD_NAME,
+// 	api_key: process.env.REACT_APP_API_KEY,
+// 	api_secret: process.env.REACT_APP_API_SECRET
+// });
 export const startNewNote = () => {
 	return async (dispatch, getState) => {
 		dispatch(savingNewNote());
@@ -9,7 +16,8 @@ export const startNewNote = () => {
 		const newNote = {
 			title: '',
 			body: '',
-			date: new Date().getTime()
+			date: new Date().getTime(),
+			imagesUrls: []
 		};
 		const newDoc = await addDoc(collection(FireBaseDB, `${uid}/journal/notes`), newNote);
 		newNote.id = newDoc.id;
@@ -37,7 +45,7 @@ export const startSaveNote = () => {
 		//delete noteToFireStore.id;
 		const noteRef = doc(FireBaseDB, `${uid}/journal/notes/${note.id}`);
 		await updateDoc(noteRef, noteToFireStore);
-		dispatch(updatedNote(noteToFireStore));
+		dispatch(updatedNote(note));
 	};
 };
 
@@ -45,11 +53,26 @@ export const startUploadingFiles = (files) => {
 	return async (dispatch) => {
 		dispatch(setSaving());
 		const _files = Array.from(files);
-		const fileUploadPromises =[];
+		const fileUploadPromises = [];
 		_files.forEach((f) => fileUploadPromises.push(fileUpload(f)));
-		const photosUrl =await Promise.all(fileUploadPromises);
+		const photosUrl = await Promise.all(fileUploadPromises);
 		dispatch(setPhotosToActiveNote(photosUrl));
 		dispatch(saveNote());;
 
 	};
 };
+
+export const startDeletingNote = () => {
+	return async (dispatch, getState) => {
+
+		const { uid } = getState().auth;
+		const { active: note } = getState().journal;
+		const docRef = doc(FireBaseDB, `${uid}/journal/notes/${note.id}`);
+		await deleteDoc(docRef);
+		dispatch(deleteNoteByID(note.id));
+		
+		//const resp = await cloudinary.v2.uploader.destroy("mbgcptbfxgegbu23cthf");
+		//console.log(resp);
+
+	}
+}

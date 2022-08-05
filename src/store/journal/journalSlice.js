@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { ActionCodeOperation } from 'firebase/auth';
 
 export const journalSlice = createSlice({
 	name: 'journal',
@@ -49,7 +50,10 @@ export const journalSlice = createSlice({
 		saveNote: (state, action) => {
 			state.isSaving = false;
 		},
-		deleteNoteByID: (state, action) => {},
+		deleteNoteByID: (state, action) => {
+			state.active=null;
+			state.notes = state.notes.filter(n=>n.id!=action.payload);
+		},
 		setPhotosToActiveNote :(state,action)=>{
 			state.active.imageUrls =[...state.active.imageUrls,...action.payload]
 
@@ -64,13 +68,13 @@ export const journalSlice = createSlice({
 });
 export const {
 	addNewEmptyNote,
+	clearNotesLogout,
 	deleteNoteByID,
 	saveNote,
-	updatedNote,
 	savingNewNote,
 	setActiveNote,
 	setNotes,
 	setPhotosToActiveNote,
-	clearNotesLogout,
 	setSaving,
+	updatedNote,
 } = journalSlice.actions;

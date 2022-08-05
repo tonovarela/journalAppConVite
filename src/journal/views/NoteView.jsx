@@ -1,12 +1,13 @@
-import { SaveOutlined, UploadOutlined } from '@mui/icons-material';
+import { DeleteOutline, SaveOutlined, UploadOutlined } from '@mui/icons-material';
 import { Grid, Typography, Button, TextField, IconButton } from '@mui/material';
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from '../../hooks/useFom';
-import { setActiveNote, startSaveNote,startUploadingFiles } from '../../store/journal';
+import { setActiveNote, startSaveNote, startUploadingFiles } from '../../store/journal';
 import { ImageGallery } from '../components';
 import Swal from 'sweetalert2';
 //import 'sweetalert2/dist/sweetalert2.css'
+import { startDeletingNote } from '../../store/journal/thunks';
 
 export const NoteView = () => {
 	const dispatch = useDispatch();
@@ -20,14 +21,14 @@ export const NoteView = () => {
 				Swal.fire('Nota actualizada', MessageSaved, 'success');
 			}
 		},
-		[ MessageSaved ]
+		[MessageSaved]
 	);
 
 	useEffect(
 		() => {
 			dispatch(setActiveNote(formState));
 		},
-		[ formState ]
+		[formState]
 	);
 
 	const dateString = useMemo(
@@ -35,19 +36,39 @@ export const NoteView = () => {
 			const fecha = new Date(date);
 			return fecha.toUTCString();
 		},
-		[ date ]
+		[date]
 	);
 	const onSaveNote = () => {
 		dispatch(startSaveNote());
 	};
+	const onDelete = async () => {
 
+		const { isConfirmed } = await Swal.fire({
+			title: 'Esta seguro de borrar?',
+			text: "Estos cambios no son reversibles",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#3085d6',
+			cancelButtonColor: '#d33',
+			confirmButtonText: 'Si, borrarlo'
+		});
+		if (isConfirmed) {
+			dispatch(startDeletingNote())
+			Swal.fire(
+				'Borrado!',
+				'El archivo ha sido borrado con exito.',
+				'success'
+			)
+		}
+
+	};
 	const onFileInputChange = ({ target }) => {
-		const {files} = target
+		const { files } = target
 		if (files.length == 0) {
 			return;
 		}
 		dispatch(startUploadingFiles(files));
-		
+
 	};
 
 	return (
@@ -65,23 +86,23 @@ export const NoteView = () => {
 				</Typography>
 			</Grid>
 			<Grid item>
-                <IconButton>
-                    <label htmlFor="btnFile"> 
-                        <UploadOutlined />
-                    </label>
-                </IconButton>
-                <input
-                    id="btnFile" 
-                    style={{ display: "none" }}
-                    type="file"
-                    multiple
-                    onChange={onFileInputChange}
-                />
-                <Button disabled={isSaving} onClick={onSaveNote}>
-                    <SaveOutlined sx={{ fontSize: 30, mr: 1 }} />
-                    Guardar
-                </Button>
-            </Grid>			
+				<IconButton>
+					<label htmlFor="btnFile">
+						<UploadOutlined />
+					</label>
+				</IconButton>
+				<input
+					id="btnFile"
+					style={{ display: "none" }}
+					type="file"
+					multiple
+					onChange={onFileInputChange}
+				/>
+				<Button disabled={isSaving} onClick={onSaveNote}>
+					<SaveOutlined sx={{ fontSize: 30, mr: 1 }} />
+					Guardar
+				</Button>
+			</Grid>
 			<Grid container>
 				<TextField
 					type="text"
@@ -108,8 +129,20 @@ export const NoteView = () => {
 				/>
 			</Grid>
 
-			<ImageGallery 
-			images={note.imageUrls}
+			<Grid container justifyContent='end'>
+				<Button
+					onClick={onDelete}
+					sx={{ mt: 2 }}
+					color="error"
+				>
+					<DeleteOutline></DeleteOutline>
+					Borrar
+				</Button>
+
+			</Grid>
+
+			<ImageGallery
+				images={note.imageUrls}
 			/>
 		</Grid>
 	);
